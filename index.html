@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com https://*.tiktokcdn.com https://*.tiktokcdn-us.com https://*.tiktokcdn-eu.com; media-src 'self' blob:; connect-src 'self' https://www.youtube.com https://www.tiktok.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#07060b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ViceClip">
+<meta name="description" content="Transforme tes vidéos longues et lives GTA en clips TikTok, directement sur iPhone.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
@@ -16,161 +19,244 @@
 </head>
 <body>
 
+<div id="splash" class="splash" aria-hidden="true">
+  <div class="splash-logo"><span class="logo-mark"></span>VICECLIP<em>AI</em></div>
+  <span class="spinner"></span>
+</div>
+
 <header class="topbar">
-  <div class="logo"><span class="logo-mark"></span>VICECLIP<em>AI</em></div>
-  <span class="phase-pill">Phase 1</span>
+  <button class="logo" data-goto="home" aria-label="Accueil"><span class="logo-mark"></span>VICECLIP<em>AI</em></button>
+  <div class="top-actions">
+    <span class="phase-pill">v2</span>
+    <button class="icon-btn sm" data-goto="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
 </header>
 
 <main>
-  <!-- ============ ACCUEIL ============ -->
-  <section id="view-home" class="view active">
-    <div class="hero">
-      <h1>Transforme tes lives<br><span class="neon">en clips TikTok.</span></h1>
-      <p>Importe une vidéo, choisis le passage, exporte un vrai MP4 sans filigrane.</p>
-      <button class="btn primary big" data-goto="editor">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nouveau clip
-      </button>
+<!-- =================== ACCUEIL =================== -->
+<section id="view-home" class="view active" aria-label="Accueil">
+  <div class="hero">
+    <p class="kicker" id="hello">Studio de clips</p>
+    <h1>Transforme tes lives<br><span class="neon">en clips TikTok.</span></h1>
+    <p>Découpe, recadre en 9:16, trouve les moments forts et exporte un vrai MP4. Tout se passe sur ton iPhone.</p>
+    <button class="btn primary big" data-goto="create"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nouveau clip</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="st-count">0</b><span>clips</span></div>
+    <div class="stat"><b id="st-dur">0 s</b><span>de contenu</span></div>
+    <div class="stat"><b id="st-fav">0</b><span>favoris</span></div>
+  </div>
+  <h2 class="sec-title">Derniers clips <button class="link" data-goto="library">Tout voir</button></h2>
+  <div id="home-recent" class="clip-grid"></div>
+
+  <h2 class="sec-title">Moteur IA <button class="link" data-goto="ai">Détails</button></h2>
+  <div class="card ai-summary" id="ai-summary"></div>
+
+  <h2 class="sec-title">Compatibilité de cet appareil</h2>
+  <ul id="compat" class="list"></ul>
+</section>
+
+<!-- =================== CRÉER =================== -->
+<section id="view-create" class="view" aria-label="Créer un clip">
+  <div id="src-pick">
+    <h2 class="page-title">Nouveau clip</h2>
+    <p class="sub">Importe ta vidéo, ou colle un lien pour voir comment récupérer le fichier original.</p>
+    <label class="src-card">
+      <span class="src-ico"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></span>
+      <span><b>Importer depuis l'iPhone</b><small>Photos ou Fichiers · MP4, MOV, WebM · reste sur ton appareil</small></span>
+      <input type="file" id="file-input" accept="video/mp4,video/quicktime,video/webm,video/*" hidden>
+    </label>
+    <div class="card">
+      <div class="card-h">Coller un lien <span class="plat-dots"><i style="--c:#ff3b3b"></i><i style="--c:#a970ff"></i><i style="--c:#53fc18"></i><i style="--c:#25f4ee"></i></span></div>
+      <div class="url-row">
+        <input id="url-input" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Lien YouTube, Twitch, Kick ou TikTok" aria-label="Lien de la vidéo">
+        <button id="url-paste" class="btn small">Coller</button>
+      </div>
+      <button id="url-go" class="btn full">Analyser le lien</button>
+      <div id="url-result" class="url-result hidden" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="editor" class="hidden">
+    <div class="stage" id="stage">
+      <video id="video" playsinline webkit-playsinline preload="auto"></video>
+      <div id="pv-wrap" class="pv-wrap hidden"><canvas id="pv" aria-label="Aperçu du cadrage"></canvas></div>
+      <div id="stage-loading" class="stage-loading"><span class="spinner"></span><span>Chargement de la vidéo…</span></div>
+      <button id="big-play" class="big-play hidden" aria-label="Lecture"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
     </div>
 
-    <div class="stats">
-      <div class="stat"><b id="st-count">0</b><span>clips</span></div>
-      <div class="stat"><b id="st-dur">0 s</b><span>de contenu</span></div>
-      <div class="stat"><b id="st-size">0 Mo</b><span>stockés</span></div>
+    <div class="file-info">
+      <div><span id="file-name">—</span><small id="file-meta"></small></div>
+      <label class="btn ghost small">Changer<input type="file" id="file-input-2" accept="video/mp4,video/quicktime,video/webm,video/*" hidden></label>
     </div>
 
-    <h2 class="sec-title">Derniers clips <button class="link" data-goto="library">Tout voir</button></h2>
-    <div id="home-recent" class="clip-grid"></div>
-
-    <h2 class="sec-title">Compatibilité de cet appareil</h2>
-    <ul id="compat" class="compat"></ul>
-
-    <h2 class="sec-title">Feuille de route</h2>
-    <ol class="roadmap">
-      <li class="on"><b>Phase 1</b> Import, découpe et export MP4 <span>Disponible</span></li>
-      <li><b>Phase 2</b> Recadrage 9:16 et édition <span>À venir</span></li>
-      <li><b>Phase 3</b> Transcription et sous-titres FR <span>À venir</span></li>
-      <li><b>Phase 4</b> Détection des meilleurs moments <span>À venir</span></li>
-      <li><b>Phase 5</b> Déploiement et optimisations <span>À venir</span></li>
-    </ol>
-  </section>
-
-  <!-- ============ ÉDITEUR ============ -->
-  <section id="view-editor" class="view">
-    <div id="editor-empty" class="empty">
-      <div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="3"/><path d="M17 10l4-2.5v9L17 14"/></svg></div>
-      <h2>Importe une vidéo</h2>
-      <p>MP4, MOV ou WebM depuis Photos ou Fichiers.<br>La vidéo reste sur ton iPhone : rien n'est envoyé sur Internet.</p>
-      <label class="btn primary big">Choisir une vidéo
-        <input type="file" id="file-input" accept="video/mp4,video/quicktime,video/webm,video/*" hidden>
-      </label>
+    <div class="transport">
+      <button id="btn-play" class="icon-btn" aria-label="Lecture ou pause"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <span class="time"><b id="cur-time">0:00.0</b> / <span id="total-time">0:00.0</span></span>
+      <button id="btn-preview-sel" class="btn ghost small">▶ Sélection</button>
     </div>
 
-    <div id="editor-main" class="hidden">
-      <div class="player-wrap">
-        <video id="video" playsinline webkit-playsinline preload="auto"></video>
-        <button id="big-play" class="big-play" aria-label="Lecture"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-      </div>
+    <div class="timeline" id="timeline">
+      <div class="thumbs" id="thumbs"></div>
+      <canvas id="energy" class="energy hidden"></canvas>
+      <div class="dim" id="dim-left"></div><div class="dim" id="dim-right"></div>
+      <div class="sel" id="sel"></div>
+      <div id="marks"></div>
+      <div class="handle" id="h-start"><i></i></div>
+      <div class="handle" id="h-end"><i></i></div>
+      <div class="playhead" id="playhead"></div>
+    </div>
+    <p class="hint">Glisse les poignées violettes · touche la barre pour te déplacer</p>
 
-      <div class="file-info">
-        <div><span id="file-name">—</span><small id="file-meta"></small></div>
-        <label class="btn ghost small">Changer
-          <input type="file" id="file-input-2" accept="video/mp4,video/quicktime,video/webm,video/*" hidden>
-        </label>
-      </div>
+    <div class="range-panel">
+      <div class="range-col"><label>Début</label><div class="tc" id="tc-start">0:00.0</div>
+        <div class="nudges"><button data-n="start" data-d="-1">−1s</button><button data-n="start" data-d="-0.1">−0,1</button><button data-n="start" data-d="0.1">+0,1</button><button data-n="start" data-d="1">+1s</button></div>
+        <button class="btn ghost small full" id="set-start">Placer à la lecture</button></div>
+      <div class="range-col"><label>Fin</label><div class="tc" id="tc-end">0:00.0</div>
+        <div class="nudges"><button data-n="end" data-d="-1">−1s</button><button data-n="end" data-d="-0.1">−0,1</button><button data-n="end" data-d="0.1">+0,1</button><button data-n="end" data-d="1">+1s</button></div>
+        <button class="btn ghost small full" id="set-end">Placer à la lecture</button></div>
+    </div>
+    <div class="sel-info">Durée du clip : <b id="sel-dur">0 s</b> <span id="sel-hint"></span></div>
+    <div class="presets"><span>Durée</span><button data-p="15">15 s</button><button data-p="30">30 s</button><button data-p="45">45 s</button><button data-p="60">60 s</button></div>
 
-      <div class="transport">
-        <button id="btn-play" class="icon-btn" aria-label="Lecture / pause"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-        <span class="time"><b id="cur-time">0:00.0</b> / <span id="total-time">0:00.0</span></span>
-        <button id="btn-preview-sel" class="btn ghost small">▶ Lire la sélection</button>
-      </div>
+    <div class="card">
+      <div class="card-h">Moments forts <span class="badge ok">Local · gratuit</span></div>
+      <p class="tiny">Analyse le son de la vidéo pour repérer cris, rires, réactions, explosions et passages intenses. L'image et les paroles ne sont pas encore comprises.</p>
+      <button id="btn-analyze" class="btn full">Analyser le son de la vidéo</button>
+      <div id="an-progress" class="hidden"><div class="progress"><div id="an-bar"></div></div><p id="an-status" class="tiny"></p></div>
+      <ol id="moments" class="moments"></ol>
+      <button id="btn-batch" class="btn primary full hidden"></button>
+    </div>
 
-      <div class="timeline" id="timeline">
-        <div class="thumbs" id="thumbs"></div>
-        <div class="dim" id="dim-left"></div>
-        <div class="dim" id="dim-right"></div>
-        <div class="sel" id="sel"></div>
-        <div class="handle" id="h-start"><i></i></div>
-        <div class="handle" id="h-end"><i></i></div>
-        <div class="playhead" id="playhead"></div>
+    <div class="card">
+      <div class="card-h">Format</div>
+      <div class="chips" data-group="format">
+        <button data-v="9:16">9:16 TikTok</button><button data-v="1:1">1:1</button><button data-v="16:9">16:9</button><button data-v="original">Original</button>
       </div>
-      <p class="hint">Glisse les poignées violettes. Touche la barre pour te déplacer.</p>
-
-      <div class="range-panel">
-        <div class="range-col">
-          <label>Début</label>
-          <div class="tc" id="tc-start">0:00.0</div>
-          <div class="nudges">
-            <button data-n="start" data-d="-1">−1s</button><button data-n="start" data-d="-0.1">−0,1</button>
-            <button data-n="start" data-d="0.1">+0,1</button><button data-n="start" data-d="1">+1s</button>
-          </div>
-          <button class="btn ghost small full" id="set-start">Placer à la lecture</button>
+      <div id="framing">
+        <div class="chips" data-group="fit">
+          <button data-v="crop">Recadrer</button><button data-v="blur">Fond flou</button><button data-v="fit">Bandes noires</button>
         </div>
-        <div class="range-col">
-          <label>Fin</label>
-          <div class="tc" id="tc-end">0:00.0</div>
-          <div class="nudges">
-            <button data-n="end" data-d="-1">−1s</button><button data-n="end" data-d="-0.1">−0,1</button>
-            <button data-n="end" data-d="0.1">+0,1</button><button data-n="end" data-d="1">+1s</button>
-          </div>
-          <button class="btn ghost small full" id="set-end">Placer à la lecture</button>
-        </div>
+        <div class="slider-row"><label for="zoom">Zoom</label><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"><span id="zoom-val">1,0×</span><button id="recenter" class="btn ghost small">Recentrer</button></div>
+        <p class="tiny">Glisse l'image dans l'aperçu pour choisir le cadrage.</p>
       </div>
-
-      <div class="sel-info">Durée du clip : <b id="sel-dur">0 s</b> <span id="sel-hint"></span></div>
-      <div class="presets">
-        <span>Durée rapide</span>
-        <button data-p="15">15 s</button><button data-p="30">30 s</button><button data-p="45">45 s</button><button data-p="60">60 s</button>
-      </div>
-
-      <label class="field"><span>Titre du clip</span>
-        <input id="clip-title" maxlength="80" placeholder="Ex : Course-poursuite de folie" autocomplete="off">
-      </label>
-
-      <button class="btn primary big full" id="btn-export">
-        <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Exporter le clip en MP4
-      </button>
-      <p class="note">L'export se fait en temps réel sur ton iPhone : un clip de 30 s prend environ 30 s. Reste dans Safari, écran allumé, jusqu'à la fin.</p>
     </div>
-  </section>
 
-  <!-- ============ BIBLIOTHÈQUE ============ -->
-  <section id="view-library" class="view">
-    <h2 class="page-title">Bibliothèque</h2>
-    <p class="sub">Tes clips sont stockés dans Safari sur cet iPhone. Enregistre-les dans Fichiers pour les garder pour de bon.</p>
-    <div id="library-grid" class="clip-grid"></div>
-  </section>
+    <div class="card">
+      <div class="card-h">Export</div>
+      <div class="chips" data-group="resolution"><button data-v="720">720p</button><button data-v="1080">1080p</button></div>
+      <div class="chips" data-group="quality"><button data-v="standard">Standard</button><button data-v="high">Haute qualité</button></div>
+      <p id="res-hint" class="tiny"></p>
+    </div>
+
+    <label class="field"><span>Titre du clip</span><input id="clip-title" maxlength="80" placeholder="Ex : Course-poursuite de folie" autocomplete="off"></label>
+    <button class="btn primary big full" id="btn-export"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Exporter le clip</button>
+    <p class="note">Export en temps réel : 30 s de clip prennent environ 30 s. Reste dans Safari, écran allumé.</p>
+  </div>
+</section>
+
+<!-- =================== BIBLIOTHÈQUE =================== -->
+<section id="view-library" class="view" aria-label="Bibliothèque">
+  <h2 class="page-title">Clips</h2>
+  <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="lib-q" type="search" placeholder="Rechercher un clip" aria-label="Rechercher"></div>
+  <div class="lib-tools">
+    <div class="chips sm" data-group="libfilter"><button data-v="all">Tous</button><button data-v="fav">★ Favoris</button><button data-v="9:16">9:16</button><button data-v="1:1">1:1</button><button data-v="16:9">16:9</button></div>
+    <select id="lib-sort" aria-label="Trier"><option value="new">Récents</option><option value="old">Anciens</option><option value="long">Plus longs</option><option value="az">A → Z</option></select>
+  </div>
+  <div id="library-grid" class="clip-grid"></div>
+  <p class="tiny center">Les clips sont gardés dans Safari sur cet iPhone. Enregistre-les dans Fichiers ou Photos pour ne jamais les perdre.</p>
+</section>
+
+<!-- =================== PROFIL =================== -->
+<section id="view-profile" class="view" aria-label="Profil">
+  <div class="profile-head"><div class="avatar" id="avatar">V</div>
+    <div><h2 id="pf-name">Créateur</h2><small id="pf-sub">Profil local</small></div></div>
+  <label class="field"><span>Ton pseudo de créateur</span><input id="pf-input" maxlength="40" placeholder="Ex : NoahGTA" autocomplete="nickname"></label>
+  <div class="stats">
+    <div class="stat"><b id="pf-count">0</b><span>clips</span></div>
+    <div class="stat"><b id="pf-dur">0 s</b><span>exportées</span></div>
+    <div class="stat"><b id="pf-size">0 Mo</b><span>stockés</span></div>
+  </div>
+  <div class="card">
+    <div class="card-h">Compte en ligne <span class="badge">Phase B</span></div>
+    <p class="tiny">La création de compte (e-mail, connexion, mot de passe oublié, synchronisation, abonnement) n'est <b>pas encore disponible</b>. Aujourd'hui, rien n'est envoyé sur Internet : tes vidéos et tes clips restent sur ton iPhone.</p>
+  </div>
+  <ul class="list nav">
+    <li><button data-goto="settings">Réglages <span>›</span></button></li>
+    <li><button data-goto="ai">Moteur IA et feuille de route <span>›</span></button></li>
+  </ul>
+</section>
+
+<!-- =================== RÉGLAGES =================== -->
+<section id="view-settings" class="view" aria-label="Réglages">
+  <h2 class="page-title">Réglages</h2>
+  <div class="card"><div class="card-h">Par défaut pour chaque nouveau clip</div>
+    <p class="lbl">Format</p><div class="chips sm" data-group="set-format"><button data-v="9:16">9:16</button><button data-v="1:1">1:1</button><button data-v="16:9">16:9</button><button data-v="original">Original</button></div>
+    <p class="lbl">Cadrage</p><div class="chips sm" data-group="set-fit"><button data-v="crop">Recadrer</button><button data-v="blur">Fond flou</button><button data-v="fit">Bandes noires</button></div>
+    <p class="lbl">Résolution</p><div class="chips sm" data-group="set-resolution"><button data-v="720">720p</button><button data-v="1080">1080p</button></div>
+    <p class="lbl">Qualité</p><div class="chips sm" data-group="set-quality"><button data-v="standard">Standard</button><button data-v="high">Haute</button></div>
+  </div>
+  <div class="card"><div class="card-h">Moments forts</div>
+    <p class="lbl">Longueur des clips proposés</p><div class="chips sm" data-group="set-clipLength"><button data-v="15">15 s</button><button data-v="30">30 s</button><button data-v="45">45 s</button><button data-v="60">60 s</button></div>
+    <p class="lbl">Nombre de propositions</p><div class="chips sm" data-group="set-suggestions"><button data-v="3">3</button><button data-v="6">6</button><button data-v="10">10</button></div>
+  </div>
+  <div class="card"><div class="card-h">Stockage</div>
+    <p class="tiny" id="storage-info">Calcul…</p>
+    <div class="actions">
+      <button id="btn-persist" class="btn small">Protéger mes clips contre l'effacement automatique</button>
+      <button id="btn-clear" class="btn danger small">Supprimer tous les clips</button>
+    </div>
+  </div>
+  <div class="card"><div class="card-h">Application</div>
+    <p class="tiny">ViceClip AI <b id="app-version"></b> · traitement 100 % local · aucune donnée collectée.</p>
+    <div class="actions">
+      <button id="btn-refresh" class="btn small">Forcer la mise à jour de l'app</button>
+      <button id="btn-reset" class="btn ghost small">Réinitialiser les réglages</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== MOTEUR IA =================== -->
+<section id="view-ai" class="view" aria-label="Moteur IA">
+  <h2 class="page-title">Moteur IA</h2>
+  <p class="sub">Ce qui fonctionne vraiment aujourd'hui, et ce qui arrive. Rien n'est simulé.</p>
+  <div id="ai-list" class="ai-list"></div>
+  <h2 class="sec-title">Feuille de route</h2>
+  <ol class="roadmap">
+    <li class="on"><b>Phase A</b> Éditeur complet, formats, moments forts sonores<span>Disponible</span></li>
+    <li><b>Phase B</b> Comptes, historique en ligne, abonnements<span>À venir</span></li>
+    <li><b>Phase C</b> Transcription, sous-titres, IA vidéo serveur<span>À venir</span></li>
+  </ol>
+</section>
 </main>
 
-<nav class="tabbar">
+<nav class="tabbar" aria-label="Navigation">
   <button data-view="home" class="active"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
-  <button data-view="editor"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/></svg>Éditeur</button>
+  <button data-view="create"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/></svg>Créer</button>
   <button data-view="library"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Clips</button>
+  <button data-view="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</button>
 </nav>
 
 <!-- Feuille d'export -->
-<div id="export-sheet" class="sheet hidden">
+<div id="export-sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="exp-title">
   <div class="sheet-card">
     <h3 id="exp-title">Export en cours…</h3>
-    <div class="exp-stage">
-      <canvas id="exp-canvas"></canvas>
-      <video id="exp-result" class="hidden" playsinline controls></video>
-    </div>
+    <p id="exp-batch" class="tiny hidden"></p>
+    <div class="exp-stage"><canvas id="exp-canvas"></canvas><video id="exp-result" class="hidden" playsinline controls></video></div>
     <div class="progress"><div id="exp-bar"></div></div>
-    <p id="exp-status" class="exp-status"></p>
-    <div id="exp-running" class="actions">
-      <button id="exp-cancel" class="btn ghost full">Annuler</button>
-    </div>
+    <p id="exp-status" class="exp-status" aria-live="polite"></p>
+    <div id="exp-running" class="actions"><button id="exp-cancel" class="btn ghost full">Annuler</button></div>
     <div id="exp-done" class="actions hidden">
       <button id="exp-save" class="btn primary big full">Enregistrer / Partager</button>
       <button id="exp-download" class="btn full">Télécharger dans Fichiers</button>
       <button id="exp-close" class="btn ghost full">Fermer</button>
-      <p class="tiny">« Enregistrer / Partager » ouvre le menu iOS : choisis <b>Enregistrer dans Fichiers</b> ou <b>Enregistrer la vidéo</b> (Photos). « Télécharger » place le fichier dans Fichiers › Téléchargements.</p>
+      <p class="tiny">« Enregistrer / Partager » ouvre le menu iOS : choisis <b>Enregistrer dans Fichiers</b> ou <b>Enregistrer la vidéo</b>. « Télécharger » range le fichier dans Fichiers › Téléchargements.</p>
     </div>
   </div>
 </div>
 
 <!-- Feuille d'un clip -->
-<div id="clip-sheet" class="sheet hidden">
+<div id="clip-sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cs-title">
   <div class="sheet-card">
     <div class="sheet-head"><h3 id="cs-title">Clip</h3><button id="cs-close" class="icon-btn" aria-label="Fermer">✕</button></div>
     <video id="cs-video" playsinline controls></video>
@@ -178,7 +264,8 @@
     <div class="actions">
       <button id="cs-save" class="btn primary big full">Enregistrer / Partager</button>
       <button id="cs-download" class="btn full">Télécharger dans Fichiers</button>
-      <div class="row">
+      <div class="row3">
+        <button id="cs-fav" class="btn ghost">☆ Favori</button>
         <button id="cs-rename" class="btn ghost">Renommer</button>
         <button id="cs-delete" class="btn danger">Supprimer</button>
       </div>
@@ -186,7 +273,7 @@
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
-<script src="app.js"></script>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js"></script>
 </body>
 </html>
